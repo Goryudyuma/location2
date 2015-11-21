@@ -4,11 +4,11 @@ $pass = explode("\n",file_get_contents("./N05-14_GML/PW.txt"));
 $pdo = new PDO('mysql:dbname=location;host=localhost:charset=utf8',$pass[0],$pass[1]);
 
 $query="CREATE TABLE IF NOT EXISTS Section(
-	id integer NOT NULL,
-	RInt integer NOT NULL COMMENT '種別。新幹線が1、在来線が2など',
+	id INTEGER NOT NULL,
+	RInt INTEGER NOT NULL COMMENT '種別。新幹線が1、在来線が2など',
 	Lin TEXT NOT NULL COMMENT '名前',
 	Opc TEXT NOT NULL COMMENT '会社名',
-	Rfid TEXT NOT NULL COMMENT '文字列ID',
+	Rfid INTEGER NOT NULL COMMENT '文字列ID',
 	PRIMARY KEY(id)
 ) ENGINE = innoDB DEFAULT CHARSET=utf8;";
 $pdo->query($query);
