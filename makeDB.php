@@ -1,12 +1,12 @@
 <?php
 
 $pass = explode("\n", file_get_contents('./N05-14_GML/PW.txt'));
-$pdo = new PDO('mysql:dbname=location;host=localhost:charset=utf8', $pass[0], $pass[1]);
+$pdo = new PDO('mysql:dbname=location;host=localhost:charset=utf8', $pass[0], $pass[1], [PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION]);
 
 $pdo->beginTransaction();
 
 try {
-	$pdo->query('DROP TABLE IF EXISTS section;');
+	$pdo->exec('DROP TABLE IF EXISTS section;');
 
 	$query = "CREATE TABLE IF NOT EXISTS section(
 		id INTEGER NOT NULL,
@@ -19,7 +19,25 @@ try {
 		end INTEGER NOT NULL COMMENT '廃止年',
 		PRIMARY KEY(id)
 	) ENGINE = innoDB DEFAULT CHARSET=utf8;";
-	$pdo->query($query);
+	$pdo->exec($query);
+
+	
+	$pdo->exec('DROP TABLE IF EXISTS station;');
+
+	$query = "CREATE TABLE IF NOT EXISTS station(
+		id INTEGER NOT NULL,
+		stn TEXT NOT NULL COMMENT '駅名',
+		sectionid INTEGER NOT NULL COMMENT '路線id',
+		rfid INTEGER NOT NULL COMMENT '文字列ID',
+		time INTEGER NOT NULL COMMENT '駅開業年',
+		begin INTEGER NOT NULL COMMENT '開業年',
+		end INTEGER NOT NULL COMMENT '駅廃止年',
+		pos GEOMETRY NOT NULL COMMENT '座標',
+		PRIMARY KEY(id)	
+	) ENGINE = INNODB DEFAULT CHARSET=utf8;";
+	$pdo->exec($query);
+
+
 
 	$json = file_get_contents('./N05-14_GML/N05-14.json');
 	$contents = json_decode($json, true);
