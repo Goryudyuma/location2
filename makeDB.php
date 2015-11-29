@@ -62,25 +62,26 @@ try {
 	}
 	$sth = $pdo->prepare('INSERT INTO station (`id`, `stn`, `sectionid`, `rfid`, `time`, `begin`, `end`, `pos`) VALUES (:id, :stn, :sectionid, :rfid, :time, :begin, :end, POINT(:north, :east))');
 	foreach ($contents["ksj_Station2"] as $v) {
-		$num["id"] = (int) substr($v["@attributes"]["gml_id"],3);
-		$sth->bindParam(':id', $num["id"], PDO::PARAM_INT);
-		$str["stn"] = (string) $v["ksj_stn"];
-		$sth->bindParam(':stn', $str["stn"], PDO::PARAM_STR);
-		$num["rfid"] = (int) substr($v["ksj_rfid"],5,5);
-		$sth->bindParam(':sectionid', $num["rfid"], PDO::PARAM_INT);
-		$str["rfid"] = (string) $v["ksj_rfid"];
-		$sth->bindParam(':rfid', $str["rfid"], PDO::PARAM_STR);
-		$num["time"] = (int) $v["ksj_usb"]["gml_TimeInstant"]["gml_timePosition"];
-		$sth->bindParam(':time', $num["time"], PDO::PARAM_INT);
-		$num["begin"] = (int) $v["ksj_exp"]["gml_TimePeriod"]["gml_beginPosition"];
-		$sth->bindParam(':begin', $num["begin"] , PDO::PARAM_INT);
-		$num["end"] = (int) $v["ksj_exp"]["gml_TimePeriod"]["gml_endPosition"];
-		$sth->bindParam(':end', $num["end"], PDO::PARAM_INT);
+		$var["id"] = (int) substr($v["@attributes"]["gml_id"],3);
+		$var["stn"] = (string) $v["ksj_stn"];
+		$var["rfid"] = (int) substr($v["ksj_rfid"],5,5);
+		$var["rfids"] = (string) $v["ksj_rfid"];
+		$var["time"] = (int) $v["ksj_usb"]["gml_TimeInstant"]["gml_timePosition"];
+		$var["begin"] = (int) $v["ksj_exp"]["gml_TimePeriod"]["gml_beginPosition"];
+		$var["end"] = (int) $v["ksj_exp"]["gml_TimePeriod"]["gml_endPosition"];
 		$point = explode(' ', $a[substr($v["ksj_loc"]["@attributes"]["xlink_href"], 1)]);
-		$point[0] = (string)(float) $point[0];
-		$point[1] = (string)(float) $point[1];
-		$sth->bindParam(':north', $point[0], PDO::PARAM_STR);
-		$sth->bindParam(':east', $point[1], PDO::PARAM_STR);
+		$var["north"] = (string)(float) $point[0];
+		$var["east"] = (string)(float) $point[1];
+
+		$sth->bindParam(':id', $var["id"], PDO::PARAM_INT);
+		$sth->bindParam(':stn', $var["stn"], PDO::PARAM_STR);
+		$sth->bindParam(':sectionid', $var["rfid"], PDO::PARAM_INT);
+		$sth->bindParam(':rfid', $var["rfids"], PDO::PARAM_STR);
+		$sth->bindParam(':time', $var["time"], PDO::PARAM_INT);
+		$sth->bindParam(':begin', $var["begin"] , PDO::PARAM_INT);
+		$sth->bindParam(':end', $var["end"], PDO::PARAM_INT);
+		$sth->bindParam(':north', $var["north"], PDO::PARAM_STR);
+		$sth->bindParam(':east', $var["east"], PDO::PARAM_STR);
 		$sth->execute();
 		echo "\rstation:".sprintf("%04d", substr($v["@attributes"]["gml_id"], 3)).'/'.sizeof($contents["ksj_Station2"]);
 	}
