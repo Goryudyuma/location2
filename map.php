@@ -6,7 +6,7 @@ if ($_POST['x']==""||$_POST['y']=="") {
 }
 $pass = explode("\n", file_get_contents('./N05-14_GML/PW.txt'));
 $pdo = new PDO('mysql:dbname=location;host=localhost;charset=utf8', $pass[2], $pass[3], [PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION]);
-$sth = $pdo->prepare("SELECT stn ,GLength(ST_GeomFromText(CONCAT(:geo , X(pos), ' ', Y(pos), ')')))*111.319 AS distance FROM station WHERE end = 9999 ORDER BY distance LIMIT 20; ");
+$sth = $pdo->prepare("SELECT stn ,section.lin AS linename, GLength(ST_GeomFromText(CONCAT(:geo , X(pos), ' ', Y(pos), ')')))*111.319 AS distance FROM station INNER JOIN (SELECT DISTINCT rfid, lin FROM section WHERE end = 9999) AS section ON section.rfid = sectionid WHERE end = 9999 ORDER BY distance LIMIT 20; ");
 $var["north"] = (string)(float) $_POST['y'];
 $var["east"] = (string)(float) $_POST['x'];
 $sth->execute(["geo" => "LineString(".$var['north'].' '.$var['east'].","]);
@@ -25,14 +25,16 @@ $sth->execute(["geo" => "LineString(".$var['north'].' '.$var['east'].","]);
 <table>
 <tr>
 <th>駅名</th>
+<th>線名</th>
 <th>距離</th>
 </tr>
 <?php
 while($result = $sth->fetch(PDO::FETCH_ASSOC)){
-	echo '<tr>';
-	echo '<th>'.$result['stn'].'</th>';
-	echo '<th>'.$result['distance'].'</th>';
-	echo '</tr>'.PHP_EOL;
+	echo '<tr>'.
+		 '<th>'.$result['stn'].'</th>'.
+		 '<th>'.$result['linename'].'</th>'.
+		 '<th>'.$result['distance'].'</th>'.
+		 '</tr>'.PHP_EOL;
 }
 ?>
 </table>
