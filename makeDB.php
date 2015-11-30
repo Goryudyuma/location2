@@ -17,7 +17,8 @@ try {
 		time INTEGER NOT NULL COMMENT '線路開業年',
 		begin INTEGER NOT NULL COMMENT '開業年',
 		end INTEGER NOT NULL COMMENT '廃止年',
-		PRIMARY KEY(id)
+		PRIMARY KEY(id),
+		INDEX(end)
 	) ENGINE = innoDB DEFAULT CHARSET=utf8;";
 	$pdo->exec($query);
 
@@ -33,7 +34,9 @@ try {
 		begin INTEGER NOT NULL COMMENT '開業年',
 		end INTEGER NOT NULL COMMENT '駅廃止年',
 		pos GEOMETRY NOT NULL COMMENT '座標',
-		PRIMARY KEY(id)
+		PRIMARY KEY(id),
+		INDEX(end),
+		SPATIAL INDEX(pos)
 	) ENGINE = INNODB DEFAULT CHARSET=utf8;";
 	$pdo->exec($query);
 
