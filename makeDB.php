@@ -38,7 +38,7 @@ try {
 		PRIMARY KEY(id),
 		INDEX(sectionid),
 		INDEX(end),
-		INDEX(emd, sectionid),
+		INDEX(end, sectionid),
 		SPATIAL INDEX(pos)
 	) ENGINE = INNODB DEFAULT CHARSET=utf8;";
 	$pdo->exec($query);
