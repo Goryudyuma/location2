@@ -18,11 +18,12 @@ try {
 		begin INTEGER NOT NULL COMMENT '開業年',
 		end INTEGER NOT NULL COMMENT '廃止年',
 		PRIMARY KEY(id),
-		INDEX(end)
-	) ENGINE = innoDB DEFAULT CHARSET=utf8;";
+		INDEX(end),
+		INDEX(rfid)
+	) ENGINE = INNODB DEFAULT CHARSET=utf8;";
 	$pdo->exec($query);
 
-	
+
 	$pdo->exec('DROP TABLE IF EXISTS station;');
 
 	$query = "CREATE TABLE IF NOT EXISTS station(
@@ -35,16 +36,30 @@ try {
 		end INTEGER NOT NULL COMMENT '駅廃止年',
 		pos GEOMETRY NOT NULL COMMENT '座標',
 		PRIMARY KEY(id),
+		INDEX(sectionid),
 		INDEX(end),
+		INDEX(emd, sectionid),
 		SPATIAL INDEX(pos)
 	) ENGINE = INNODB DEFAULT CHARSET=utf8;";
 	$pdo->exec($query);
 
 
+	$pdo->exec('DROP TABLE IF EXISTS curve;');
+
+	$query = "CREATE TABLE IF NOT EXISTS curve(
+		id INTEGER NOT NULL AUTO_INCREMENT COMMENT 'id',
+		sectionid INTEGER NOT NULL COMMENT '路線id',
+		pos GEOMETRY NOT NULL COMMENT '座標',
+		PRIMARY KEY (id),
+		INDEX(sectionid),
+		SPATIAL INDEX (pos)	
+	) ENGINE = INNODB DEFAULT CHARSET=utf8;";
+	$pdo->exec($query);
+
 
 	$json = file_get_contents('./N05-14_GML/N05-14.json');
 	$contents = json_decode($json, true);
-	$sth = $pdo->prepare('INSERT INTO section (`id`, `rint`, `lin`, `opc`, `rfid`, `time`, `begin`, `end`) VALUES (?, ?, ?, ?, ?, ?, ?, ?)');
+	$sth = $pdo->prepare('INSERT INTO section (`id`, `rint`, `lin`, `opc`, `rfid`, `time`, `begin`, `end`) VALUES (?, ?, ?, ?, ?, ?, ?, ?);');
 	foreach ($contents["ksj_RailroadSection2"] as $v) {
 		$sth->bindValue(1, (int) substr($v["@attributes"]["gml_id"], 3), PDO::PARAM_INT);
 		$sth->bindValue(2, (string) $v["ksj_int"], PDO::PARAM_STR);
@@ -63,7 +78,7 @@ try {
 	foreach ($contents["gml_Point"] as $v) {
 		$a[$v["@attributes"]["gml_id"]]=$v["gml_pos"];
 	}
-	$sth = $pdo->prepare('INSERT INTO station (`id`, `stn`, `sectionid`, `rfid`, `time`, `begin`, `end`, `pos`) VALUES (:id, :stn, :sectionid, :rfid, :time, :begin, :end, POINT(:north, :east))');
+	$sth = $pdo->prepare('INSERT INTO station (`id`, `stn`, `sectionid`, `rfid`, `time`, `begin`, `end`, `pos`) VALUES (:id, :stn, :sectionid, :rfid, :time, :begin, :end, POINT(:north, :east));');
 	foreach ($contents["ksj_Station2"] as $v) {
 		$var["id"] = (int) substr($v["@attributes"]["gml_id"],3);
 		$var["stn"] = (string) $v["ksj_stn"];
@@ -89,6 +104,32 @@ try {
 		echo "\rstation:".sprintf("%04d", substr($v["@attributes"]["gml_id"], 3)).'/'.sizeof($contents["ksj_Station2"]);
 	}
 	echo PHP_EOL;
+
+	$b=[];
+	foreach ($contents["gml_Curve"] as $v) {
+		$b[substr($v["@attributes"]["gml_id"], 3)] = explode("\n", ($v["gml_segments"]["gml_LineStringSegment"]["gml_posList"]));
+		foreach ($b[substr($v["@attributes"]["gml_id"], 3)] as &$c) {
+			$c=explode(' ', trim($c));
+		}
+	}
+	$sth = $pdo->prepare('INSERT INTO curve (`id`, `sectionid`, `pos`) VALUES (NULL, :sectionid, POINT(:north, :east));');
+	foreach ($b as $k => $u) {
+		$var["sectionid"] = (int) substr($k, 3);
+		foreach ($u as $v) {
+			if(sizeof($v)==2){
+				$var["north"] = (string)(float) $v[0];
+				$var["east"] = (string)(float) $v[1];
+				$sth->bindParam(':sectionid', $var["sectionid"], PDO::PARAM_INT);
+				$sth->bindParam(':north', $var["north"], PDO::PARAM_STR);
+				$sth->bindParam(':east', $var["east"], PDO::PARAM_STR);
+				$sth->execute();
+			}
+		}
+		echo "\rcurve:".sprintf("%04d", $var["sectionid"]).'/'.sizeof($b);
+	}
+	echo PHP_EOL;
+
+
 	$pdo->commit();
 } catch(PDOException $e) {
 	echo "Error:". $e->getMessage(). PHP_EOL;
