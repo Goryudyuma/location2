@@ -23,6 +23,7 @@
 				React.DOM.tr({},
 					React.DOM.td({},station.stn),
 					React.DOM.td({},station.linename),
+					React.DOM.td({},station.opc),
 					React.DOM.td({},station.distance)
 				)
 				);
@@ -31,6 +32,7 @@
 				React.DOM.tr({},
 					React.DOM.th({},'駅名'),
 					React.DOM.th({},'線名'),
+					React.DOM.th({},'社名'),
 					React.DOM.th({},'距離')
 				)
 			);
@@ -73,18 +75,19 @@
 						}.bind(this),
 						error: function(xhr, status, err){
 							console.error(this.props.url, status, err.toString());	
-						}.bind(this)
+						}.bind(this),
 					});
 				}
 			},
 			componentDidMount: function(){
 				this.loadNearStationsFromServer();
-				setInterval(this.loadNearStationsFromServer, this.props.pollInterval);
+				setInterval(this.loadNearStationsFromServer, this.props.pollInterval * 5);
 			},
 			render: function(){
 				if(this.state != null ){
 					return(
 						<div className="Stations">
+							<h1>最寄り駅リスト</h1>
 							<NearStations data={this.state.data}/>
 						</div>
 					);
@@ -99,7 +102,7 @@
 		});
 
 		ReactDOM.render(
-			<Stations url="stations.php" pollInterval={5000} />,
+			<Stations url="stations.php" pollInterval={1000} />,
 			document.getElementById('content')
 		);
 
