@@ -19,7 +19,8 @@ try {
 		end INTEGER NOT NULL COMMENT '廃止年',
 		PRIMARY KEY(id),
 		INDEX(end),
-		INDEX(rfid)
+		INDEX(rfid),
+		INDEX(end, rfid)
 	) ENGINE = INNODB DEFAULT CHARSET=utf8;";
 	$pdo->exec($query);
 
@@ -53,6 +54,18 @@ try {
 		PRIMARY KEY (id),
 		INDEX(sectionid),
 		SPATIAL INDEX (pos)	
+	) ENGINE = INNODB DEFAULT CHARSET=utf8;";
+	$pdo->exec($query);
+
+
+	$pdo->exec('DROP TABLE IF EXISTS json;');
+
+	$query = "CREATE TABLE IF NOT EXISTS json(
+		id INTEGER NOT NULL AUTO_INCREMENT COMMENT 'id',
+		sectionid INTEGER NOT NULL COMMENT '路線id',
+		json JSON NOT NULL COMMENT 'json',
+		PRIMARY KEY (id),
+		INDEX(sectionid)
 	) ENGINE = INNODB DEFAULT CHARSET=utf8;";
 	$pdo->exec($query);
 
@@ -119,6 +132,7 @@ try {
 			if(sizeof($v)==2){
 				$var["north"] = (string)(float) $v[0];
 				$var["east"] = (string)(float) $v[1];
+
 				$sth->bindParam(':sectionid', $var["sectionid"], PDO::PARAM_INT);
 				$sth->bindParam(':north', $var["north"], PDO::PARAM_STR);
 				$sth->bindParam(':east', $var["east"], PDO::PARAM_STR);
@@ -126,6 +140,19 @@ try {
 			}
 		}
 		echo "\rcurve:".sprintf("%04d", $var["sectionid"]).'/'.sizeof($b);
+	}
+	echo PHP_EOL;
+
+
+	$sth = $pdo->prepare('INSERT INTO json (`id`, `sectionid`, `json`) VALUES (NULL, :sectionid, :json);');
+	foreach ($b as $k => $u) {
+		$var["sectionid"] = (int) substr($k, 3);
+		$var["json"] = (string) json_encode($u, JSON_UNESCAPED_UNICODE);
+
+		$sth->bindParam(':sectionid', $var["sectionid"], PDO::PARAM_INT);
+		$sth->bindParam(':json', $var["json"], PDO::PARAM_STR);
+		$sth->execute();
+		echo "\rjson:".sprintf("%04d", $var["sectionid"]).'/'.sizeof($b);
 	}
 	echo PHP_EOL;
 
