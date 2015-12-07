@@ -62,11 +62,9 @@
 	
 				function error(err) {
 					console.error('ERROR(' + err.code + '): ' + err.message);
-					console.log('ERROR(' + err.code + '): ' + err.message);
 				};
 	
-				var id;
-				id = navigator.geolocation.watchPosition(
+				navigator.geolocation.watchPosition(
 					(pos) => {
 						if (this.state.x !== pos.coords.latitude || this.state.y !== pos.coords.longitude){
 							this.setState({x: pos.coords.latitude});
@@ -94,7 +92,6 @@
 			},
 			componentDidMount: function(){
 				this.nowLocation();
-				//setInterval(this.nowLocation, this.props.pollInterval * 5);
 			},
 			render: function(){
 				if(this.state.data.toString() !== [].toString() ){
