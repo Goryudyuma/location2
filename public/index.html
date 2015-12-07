@@ -43,8 +43,14 @@
 		});
 
 
-		var crd;
 		var Stations = React.createClass({
+			getInitialState: function(){
+				return {
+					data: [],
+					x: -1.0,
+					y: -1.0
+				};
+			},
 			nowLocation: function(){
 				var options = {
 					enableHighAccuracy: true,
@@ -59,15 +65,19 @@
 					console.warn('ERROR(' + err.code + '): ' + err.message);
 				};
 	
-				navigator.geolocation.getCurrentPosition(success, error, options);
-				return crd;
+				navigator.geolocation.getCurrentPosition(
+					(pos) => {
+						this.setState({x: pos.coords.latitude});
+						this.setState({y: pos.coords.longitude});
+					}, error, options
+				);
 
 			},
 			loadNearStationsFromServer: function(){
-				var crd = this.nowLocation();
-				if(typeof(crd) != "undefined"){
+				this.nowLocation();
+				if(this.state.x !== -1.0 && this.state.y !== -1.0){
 					$.ajax({
-						url: this.props.url + '?x=' + crd.latitude + '&y=' + crd.longitude,
+						url: this.props.url + '?x=' + this.state.x + '&y=' + this.state.y,
 						dataType: 'json',
 						cache: false,
 						success: function(data){
@@ -80,11 +90,10 @@
 				}
 			},
 			componentDidMount: function(){
-				this.loadNearStationsFromServer();
 				setInterval(this.loadNearStationsFromServer, this.props.pollInterval * 5);
 			},
 			render: function(){
-				if(this.state != null ){
+				if(this.state.data.toString() !== [].toString() ){
 					return(
 						<div className="Stations">
 							<h1>最寄り駅リスト</h1>
@@ -92,6 +101,7 @@
 						</div>
 					);
 				}else{
+					this.loadNearStationsFromServer();
 					return(
 						<div className="Stations">
 							しばらくおまちください
@@ -102,7 +112,7 @@
 		});
 
 		ReactDOM.render(
-			<Stations url="stations.php" pollInterval={1000} />,
+			<Stations url="stations.php" pollInterval={500} />,
 			document.getElementById('content')
 		);
 
