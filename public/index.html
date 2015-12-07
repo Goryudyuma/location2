@@ -18,27 +18,29 @@
 		
 		var NearStations = React.createClass({
 			render: function(){
-			var nearstation = this.props.data.map(function(station){
-				return(
-				React.DOM.tr({},
-					React.DOM.td({},station.stn),
-					React.DOM.td({},station.linename),
-					React.DOM.td({},station.opc),
-					React.DOM.td({},station.distance)
-				)
+				var nearstation = this.props.data.map(function(station){
+					return(
+						React.DOM.tr({},
+							React.DOM.td({},station.stn),
+							React.DOM.td({},station.linename),
+							React.DOM.td({},station.opc),
+							React.DOM.td({},station.distance)
+						)
+					);
+				});
+				
+				var thead = React.DOM.thead({},
+					React.DOM.tr({},
+						React.DOM.th({},'駅名'),
+						React.DOM.th({},'線名'),
+						React.DOM.th({},'社名'),
+						React.DOM.th({},'距離')
+					)
 				);
-			});
-			var thead = React.DOM.thead({},
-				React.DOM.tr({},
-					React.DOM.th({},'駅名'),
-					React.DOM.th({},'線名'),
-					React.DOM.th({},'社名'),
-					React.DOM.th({},'距離')
-				)
-			);
-			return (
-					React.DOM.table({},[thead,nearstation])
-			);
+				
+				return (
+						React.DOM.table({},[thead,nearstation])
+				);
 			}
 		});
 
@@ -59,19 +61,23 @@
 				};
 	
 				function error(err) {
-					console.warn('ERROR(' + err.code + '): ' + err.message);
+					console.error('ERROR(' + err.code + '): ' + err.message);
+					console.log('ERROR(' + err.code + '): ' + err.message);
 				};
 	
-				navigator.geolocation.getCurrentPosition(
+				var id;
+				id = navigator.geolocation.watchPosition(
 					(pos) => {
-						this.setState({x: pos.coords.latitude});
-						this.setState({y: pos.coords.longitude});
+						if (this.state.x !== pos.coords.latitude || this.state.y !== pos.coords.longitude){
+							this.setState({x: pos.coords.latitude});
+							this.setState({y: pos.coords.longitude});
+							this.loadNearStationsFromServer();
+						}
 					}, error, options
 				);
 
 			},
 			loadNearStationsFromServer: function(){
-				this.nowLocation();
 				if(this.state.x !== -1.0 && this.state.y !== -1.0){
 					$.ajax({
 						url: this.props.url + '?x=' + this.state.x + '&y=' + this.state.y,
@@ -87,7 +93,8 @@
 				}
 			},
 			componentDidMount: function(){
-				setInterval(this.loadNearStationsFromServer, this.props.pollInterval * 5);
+				this.nowLocation();
+				//setInterval(this.nowLocation, this.props.pollInterval * 5);
 			},
 			render: function(){
 				if(this.state.data.toString() !== [].toString() ){
@@ -98,7 +105,6 @@
 						</div>
 					);
 				}else{
-					this.loadNearStationsFromServer();
 					return(
 						<div className="Stations">
 							しばらくおまちください
