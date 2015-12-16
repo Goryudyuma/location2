@@ -91,7 +91,19 @@ try {
 	foreach ($contents["gml_Point"] as $v) {
 		$a[$v["@attributes"]["gml_id"]]=$v["gml_pos"];
 	}
+
 	$sth = $pdo->prepare('INSERT INTO station (`id`, `stn`, `sectionid`, `rfid`, `time`, `begin`, `end`, `pos`) VALUES (:id, :stn, :sectionid, :rfid, :time, :begin, :end, POINT(:north, :east));');
+
+	$sth->bindParam(':id', $var["id"], PDO::PARAM_INT);
+	$sth->bindParam(':stn', $var["stn"], PDO::PARAM_STR);
+	$sth->bindParam(':sectionid', $var["rfid"], PDO::PARAM_INT);
+	$sth->bindParam(':rfid', $var["rfids"], PDO::PARAM_STR);
+	$sth->bindParam(':time', $var["time"], PDO::PARAM_INT);
+	$sth->bindParam(':begin', $var["begin"] , PDO::PARAM_INT);
+	$sth->bindParam(':end', $var["end"], PDO::PARAM_INT);
+	$sth->bindParam(':north', $var["north"], PDO::PARAM_STR);
+	$sth->bindParam(':east', $var["east"], PDO::PARAM_STR);
+
 	foreach ($contents["ksj_Station2"] as $v) {
 		$var["id"] = (int) substr($v["@attributes"]["gml_id"],3);
 		$var["stn"] = (string) $v["ksj_stn"];
@@ -104,19 +116,11 @@ try {
 		$var["north"] = (string)(float) $point[0];
 		$var["east"] = (string)(float) $point[1];
 
-		$sth->bindParam(':id', $var["id"], PDO::PARAM_INT);
-		$sth->bindParam(':stn', $var["stn"], PDO::PARAM_STR);
-		$sth->bindParam(':sectionid', $var["rfid"], PDO::PARAM_INT);
-		$sth->bindParam(':rfid', $var["rfids"], PDO::PARAM_STR);
-		$sth->bindParam(':time', $var["time"], PDO::PARAM_INT);
-		$sth->bindParam(':begin', $var["begin"] , PDO::PARAM_INT);
-		$sth->bindParam(':end', $var["end"], PDO::PARAM_INT);
-		$sth->bindParam(':north', $var["north"], PDO::PARAM_STR);
-		$sth->bindParam(':east', $var["east"], PDO::PARAM_STR);
 		$sth->execute();
 		echo "\rstation:".sprintf("%04d", substr($v["@attributes"]["gml_id"], 3)).'/'.sizeof($contents["ksj_Station2"]);
 	}
 	echo PHP_EOL;
+
 
 	$b=[];
 	foreach ($contents["gml_Curve"] as $v) {
@@ -125,7 +129,13 @@ try {
 			$c=explode(' ', trim($c));
 		}
 	}
+
 	$sth = $pdo->prepare('INSERT INTO curve (`id`, `sectionid`, `pos`) VALUES (NULL, :sectionid, POINT(:north, :east));');
+
+	$sth->bindParam(':sectionid', $var["sectionid"], PDO::PARAM_INT);
+	$sth->bindParam(':north', $var["north"], PDO::PARAM_STR);
+	$sth->bindParam(':east', $var["east"], PDO::PARAM_STR);
+
 	foreach ($b as $k => $u) {
 		$var["sectionid"] = (int) substr($k, 3);
 		foreach ($u as $v) {
@@ -133,9 +143,6 @@ try {
 				$var["north"] = (string)(float) $v[0];
 				$var["east"] = (string)(float) $v[1];
 
-				$sth->bindParam(':sectionid', $var["sectionid"], PDO::PARAM_INT);
-				$sth->bindParam(':north', $var["north"], PDO::PARAM_STR);
-				$sth->bindParam(':east', $var["east"], PDO::PARAM_STR);
 				$sth->execute();
 			}
 		}
@@ -145,12 +152,14 @@ try {
 
 
 	$sth = $pdo->prepare('INSERT INTO json (`id`, `sectionid`, `json`) VALUES (NULL, :sectionid, :json);');
+
+	$sth->bindParam(':sectionid', $var["sectionid"], PDO::PARAM_INT);
+	$sth->bindParam(':json', $var["json"], PDO::PARAM_STR);
+
 	foreach ($b as $k => $u) {
 		$var["sectionid"] = (int) substr($k, 3);
 		$var["json"] = (string) json_encode($u, JSON_UNESCAPED_UNICODE);
 
-		$sth->bindParam(':sectionid', $var["sectionid"], PDO::PARAM_INT);
-		$sth->bindParam(':json', $var["json"], PDO::PARAM_STR);
 		$sth->execute();
 		echo "\rjson:".sprintf("%04d", $var["sectionid"]).'/'.sizeof($b);
 	}
