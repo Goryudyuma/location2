@@ -1,11 +1,12 @@
 <?php
 
-$pass = explode("\n", file_get_contents('./N05-14_GML/PW.txt'));
-$pdo = new PDO('mysql:dbname=location;host=localhost', $pass[0], $pass[1], [PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION]);
-
-$pdo->beginTransaction();
+$pass = explode("\n", file_get_contents(__dir__.'/N05-14_GML/PW.txt'));
 
 try {
+	$pdo = new PDO('mysql:dbname=location;host=localhost', $pass[0], $pass[1], [PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION]);
+
+	$pdo->beginTransaction();
+
 	$pdo->exec('DROP TABLE IF EXISTS section;');
 
 	$query = "CREATE TABLE IF NOT EXISTS section(
@@ -167,7 +168,7 @@ try {
 
 
 	$pdo->commit();
-} catch(PDOException $e) {
+} catch(Exception $e) {
 	echo "Error:". $e->getMessage(). PHP_EOL;
 	$pdo->rollback();
 }
