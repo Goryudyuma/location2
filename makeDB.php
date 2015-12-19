@@ -1,7 +1,7 @@
 <?php
 
 $pass = explode("\n", file_get_contents('./N05-14_GML/PW.txt'));
-$pdo = new PDO('mysql:dbname=location;host=localhost:charset=utf8', $pass[0], $pass[1], [PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION]);
+$pdo = new PDO('mysql:dbname=location;host=localhost', $pass[0], $pass[1], [PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION]);
 
 $pdo->beginTransaction();
 
