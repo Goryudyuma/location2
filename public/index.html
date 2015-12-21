@@ -49,8 +49,50 @@
 			getInitialState: function(){
 				return {
 					data: [],
-					x: -1.0,
-					y: -1.0
+					point: {x: -1.0 , y: -1.0}
+				};
+			},
+			loadNearStationsFromServer: function(){
+				if(this.state.point !== this.props.point){
+					$.ajax({
+						url: this.props.url + '?x=' + this.props.point.x + '&y=' + this.props.point.y,
+						dataType: 'json',
+						cache: false,
+						success: function(data){
+							this.replaceState({data: data , point: this.props.point});
+						}.bind(this),
+						error: function(xhr, status, err){
+							console.error(this.props.url, status, err.toString());	
+						}.bind(this),
+					});
+				}
+			},
+			componentDidMount: function(){
+				this.loadNearStationsFromServer();
+			},
+			render: function(){
+				if(this.state.data.toString() !== [].toString() ){
+					this.loadNearStationsFromServer();
+					return(
+						<div className="Stations">
+							<h1>最寄り駅リスト</h1>
+							<NearStations data={this.state.data}/>
+						</div>
+					);
+				}else{
+					return(
+						<div className="Stations">
+							駅情報取得中
+						</div>
+					);
+				}
+			}
+		});
+
+		var Location = React.createClass({
+			getInitialState: function(){
+				return {
+					point:{x: -1.0 , y: -1.0}
 				};
 			},
 			nowLocation: function(){
@@ -66,58 +108,30 @@
 	
 				navigator.geolocation.watchPosition(
 					(pos) => {
-						if (this.state.x !== pos.coords.latitude || this.state.y !== pos.coords.longitude){
-							this.setState({x: pos.coords.latitude});
-							this.setState({y: pos.coords.longitude});
-							this.loadNearStationsFromServer();
+						if (this.state.point.x !== pos.coords.latitude || this.state.point.y !== pos.coords.longitude){
+							this.replaceState({point: {x: pos.coords.latitude , y: pos.coords.longitude}});
 						}
 					}, error, options
 				);
 
 			},
-			loadNearStationsFromServer: function(){
-				if(this.state.x !== -1.0 && this.state.y !== -1.0){
-					$.ajax({
-						url: this.props.url + '?x=' + this.state.x + '&y=' + this.state.y,
-						dataType: 'json',
-						cache: false,
-						success: function(data){
-							this.setState({data: data});
-						}.bind(this),
-						error: function(xhr, status, err){
-							console.error(this.props.url, status, err.toString());	
-						}.bind(this),
-					});
-				}
-			},
 			componentDidMount: function(){
 				this.nowLocation();
 			},
 			render: function(){
-				if(this.state.data.toString() !== [].toString() ){
+				if(this.state.point.x !== -1.0 && this.state.point.y !== -1.0){
 					return(
-						<div className="Stations">
-							<h1>最寄り駅リスト</h1>
-							<NearStations data={this.state.data}/>
+						<div className="Location">
+							<Stations url="stations.php" point={this.state.point} />
 						</div>
 					);
-				}else{
+				} else {
 					return(
-						<div className="Stations">
-							しばらくおまちください
+						<div className="Location">
+							GPS取得中
 						</div>
 					);
 				}
-			}
-		});
-
-		var Location = React.createClass({
-			render: function(){
-				return(
-					<div className="Lacation">
-						<Stations url="stations.php" pollInterval={500} />
-					</div>
-				);
 			}
 		});
 
