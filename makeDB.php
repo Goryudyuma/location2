@@ -166,7 +166,6 @@ try {
 	}
 	echo PHP_EOL;
 
-
 	$pdo->commit();
 } catch(Exception $e) {
 	echo "Error:". $e->getMessage(). PHP_EOL;
