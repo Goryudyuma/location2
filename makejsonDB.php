@@ -7,22 +7,6 @@ try {
 
 	$pdo->beginTransaction();
 
-/*
-	$sth = $pdo->prepare('INSERT INTO json (`id`, `sectionid`, `json`) VALUES (NULL, :sectionid, :json);');
-
-	$sth->bindParam(':sectionid', $var["sectionid"], PDO::PARAM_INT);
-	$sth->bindParam(':json', $var["json"], PDO::PARAM_STR);
-
-	foreach ($b as $k => $u) {
-		$var["sectionid"] = (int) substr($k, 3);
-		$var["json"] = (string) json_encode($u, JSON_UNESCAPED_UNICODE);
-
-		$sth->execute();
-		echo "\rjson:".sprintf("%04d", $var["sectionid"]).'/'.sizeof($b);
-	}
-	echo PHP_EOL;
- */
-
 	$pdo->exec('DROP TABLE IF EXISTS returnjson;');
 
 	$query = "CREATE TABLE IF NOT EXISTS returnjson(
