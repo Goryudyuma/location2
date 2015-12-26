@@ -1,5 +1,5 @@
 <?php
-$str = "./N05-14_GML/N05-14.xml";
+$str = __dir__."/N05-14_GML/N05-14.xml";
 $content = file_get_contents($str);
 
 //XMLの名前空間、今回は邪魔なので置換して消す

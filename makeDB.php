@@ -32,7 +32,6 @@ try {
 		id INTEGER NOT NULL,
 		stn TEXT NOT NULL COMMENT '駅名',
 		sectionid INTEGER NOT NULL COMMENT '路線id',
-		rfid INTEGER NOT NULL COMMENT '文字列ID',
 		time INTEGER NOT NULL COMMENT '駅開業年',
 		begin INTEGER NOT NULL COMMENT '開業年',
 		end INTEGER NOT NULL COMMENT '駅廃止年',
@@ -93,12 +92,11 @@ try {
 		$a[$v["@attributes"]["gml_id"]]=$v["gml_pos"];
 	}
 
-	$sth = $pdo->prepare('INSERT INTO station (`id`, `stn`, `sectionid`, `rfid`, `time`, `begin`, `end`, `pos`) VALUES (:id, :stn, :sectionid, :rfid, :time, :begin, :end, POINT(:north, :east));');
+	$sth = $pdo->prepare('INSERT INTO station (`id`, `stn`, `sectionid`, `time`, `begin`, `end`, `pos`) VALUES (:id, :stn, :sectionid, :time, :begin, :end, POINT(:north, :east));');
 
 	$sth->bindParam(':id', $var["id"], PDO::PARAM_INT);
 	$sth->bindParam(':stn', $var["stn"], PDO::PARAM_STR);
 	$sth->bindParam(':sectionid', $var["rfid"], PDO::PARAM_INT);
-	$sth->bindParam(':rfid', $var["rfids"], PDO::PARAM_STR);
 	$sth->bindParam(':time', $var["time"], PDO::PARAM_INT);
 	$sth->bindParam(':begin', $var["begin"] , PDO::PARAM_INT);
 	$sth->bindParam(':end', $var["end"], PDO::PARAM_INT);
@@ -109,7 +107,6 @@ try {
 		$var["id"] = (int) substr($v["@attributes"]["gml_id"],3);
 		$var["stn"] = (string) $v["ksj_stn"];
 		$var["rfid"] = (int) substr($v["ksj_rfid"],5,5);
-		$var["rfids"] = (string) $v["ksj_rfid"];
 		$var["time"] = (int) $v["ksj_usb"]["gml_TimeInstant"]["gml_timePosition"];
 		$var["begin"] = (int) $v["ksj_exp"]["gml_TimePeriod"]["gml_beginPosition"];
 		$var["end"] = (int) $v["ksj_exp"]["gml_TimePeriod"]["gml_endPosition"];
