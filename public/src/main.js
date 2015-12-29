@@ -150,10 +150,75 @@ var Nearpoint = React.createClass({
 	}	
 });
 
+var Viewmap = React.createClass({
+	getInitialState:function(){
+		return { 
+			time: newDate()
+		}
+	},
+	render: function(){
+		return(
+			<div className="Viewmap">
+				工事中
+			</div>
+		);
+	}
+});
+
+var Linemap = React.createClass({
+	getInitialState: function(){
+		return {
+			line:{}	
+		};
+	},
+	getlinedata: function(lineid){
+		if (this.props.lineid !== -1 && this.state.line[this.props.lineid] == null) {
+			$.ajax({
+				url: "json.php",
+				type: 'POST',
+				dataType: 'json',
+				data: {id: lineid},
+				cache: true,
+				success: function(data){
+					this.setState({line: this.state.line + {lineid: data}});
+				}.bind(this),
+				error: function(xhr, status, err){
+					console.error(this.props.url, status, err.toString());	
+				}.bind(this),
+			});
+		}	
+	},
+	render: function(){
+		console.log(this.props);
+		if (this.props.lineid === -1 || this.props.lineid == null) {
+			return (
+				<div className="Linemap">
+					しばらくお待ちください
+				</div>
+			);
+		} else if (this.state.line[this.props.line] != null) {
+			return (
+				<div className="Linemap">
+					<Viewmap line={this.state.line[this.props.lineid]} point={this.props.point}/>
+					aaa
+				</div>
+			);
+		} else {
+			this.getlinedata(this.props.lineid);
+			return(
+				<div className="Linemap">
+					線データを取得中
+				</div>
+			);	
+		}
+	}
+});
+
 var Location = React.createClass({
 	getInitialState: function(){
 		return {
-			point:{x: -1.0 , y: -1.0}
+			point: {x: -1.0 , y: -1.0},
+			lineid: -1,
 		};
 	},
 	nowLocation: function(){
@@ -184,6 +249,7 @@ var Location = React.createClass({
 				<div className="Location">
 					<Stations url="stations.php" point={this.state.point} />
 					<Nearpoint url="points.php" point={this.state.point} />
+					<Linemap url="json.php" point={this.state.point} lineid={this.state.lineid} />
 				</div>
 			);
 		} else {
