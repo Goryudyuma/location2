@@ -41,9 +41,11 @@ try {
 		$y = $sth->fetchAll(PDO::FETCH_NUM);
 
 		foreach ($y as $k => $v) {
-			$y[$k] = $v[0];
+			$y[$k] = '{ "type": "Feature","geometry":{"type": "LineString", "coordinates": '.$v[0].'}}';
 		}
-		$var["json"] = '['.implode(',',$y).']';
+		
+		$str = '{"type": "FeatureCollection","features": ['.implode(',',$y).']}';
+		$var["json"] = $str;
 
 		$sth2->execute();
 
