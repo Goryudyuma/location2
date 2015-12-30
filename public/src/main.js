@@ -2,14 +2,16 @@ var NearStations = React.createClass({
 	render: function(){
 		var nearstation = this.props.data.map(function(station){
 			return(
-				React.DOM.tr({},
-					React.DOM.td({},station.stn),
-					React.DOM.td({},station.linename),
-					React.DOM.td({},station.opc),
-					React.DOM.td({},station.distance)
-				)
+				<tbody>
+					<tr onClick={this.props.chengelineid.bind(null, station.sectionid)}>
+					<td>{station.stn}</td>
+					<td>{station.linename}</td>
+					<td>{station.opc}</td>
+					<td>{station.distance}</td>
+				</tr>
+				</tbody>
 			);
-		});
+		}.bind(this));
 		
 		var thead = React.DOM.thead({},
 			React.DOM.tr({},
@@ -63,7 +65,7 @@ var Stations = React.createClass({
 			return(
 				<div className="Stations" style={divleft}>
 					<h1>最寄り駅リスト</h1>
-					<NearStations data={this.state.data}/>
+					<NearStations data={this.state.data} chengelineid={this.props.chengelineid}/>
 				</div>
 			);
 		}else{
@@ -150,16 +152,30 @@ var Nearpoint = React.createClass({
 	}	
 });
 
+var mapstyle = {
+	width: "10%",
+	height: "10%"
+};
+
 var Viewmap = React.createClass({
 	getInitialState:function(){
 		return { 
-			time: newDate()
 		}
+	},
+	drawmap: function(){
+		console.log(this.refs.name);
+		var mapOptions = {
+		};
+		var map = new google.maps.Map(ReactDOM.findDOMNode(this.refs.name), mapOptions);
+		map.data.loadGeoJson(this.props.line);	
+	},
+	componentDidUpdate: function(){
+		this.drawmap();
+		//	google.maps.event.addDomListener(window, "load", this.drawmap);
 	},
 	render: function(){
 		return(
-			<div className="Viewmap">
-				工事中
+			<div className="Viewmap" style={mapstyle}>
 			</div>
 		);
 	}
@@ -172,7 +188,7 @@ var Linemap = React.createClass({
 		};
 	},
 	getlinedata: function(lineid){
-		if (this.props.lineid !== -1 && this.state.line[this.props.lineid] == null) {
+		if (lineid !== -1 && this.state.line[lineid] == null) {
 			$.ajax({
 				url: "json.php",
 				type: 'POST',
@@ -180,7 +196,9 @@ var Linemap = React.createClass({
 				data: {id: lineid},
 				cache: true,
 				success: function(data){
-					this.setState({line: this.state.line + {lineid: data}});
+					var nowstate = this.state.line;
+					nowstate[this.props.lineid] = data;
+					this.setState({line: nowstate});
 				}.bind(this),
 				error: function(xhr, status, err){
 					console.error(this.props.url, status, err.toString());	
@@ -189,18 +207,16 @@ var Linemap = React.createClass({
 		}	
 	},
 	render: function(){
-		console.log(this.props);
 		if (this.props.lineid === -1 || this.props.lineid == null) {
 			return (
 				<div className="Linemap">
 					しばらくお待ちください
 				</div>
 			);
-		} else if (this.state.line[this.props.line] != null) {
+		} else if (this.state.line[this.props.lineid] != null) {
 			return (
 				<div className="Linemap">
 					<Viewmap line={this.state.line[this.props.lineid]} point={this.props.point}/>
-					aaa
 				</div>
 			);
 		} else {
@@ -235,10 +251,13 @@ var Location = React.createClass({
 		navigator.geolocation.watchPosition(
 			(pos) => {
 				if (this.state.point.x !== pos.coords.latitude || this.state.point.y !== pos.coords.longitude){
-					this.replaceState({point: {x: pos.coords.latitude , y: pos.coords.longitude}});
+					this.setState({point: {x: pos.coords.latitude , y: pos.coords.longitude}});
 				}
 			}, error, options
 		);
+	},
+	chengelineid: function(lineid){
+		this.setState({lineid: lineid});
 	},
 	componentDidMount: function(){
 		this.nowLocation();
@@ -247,8 +266,8 @@ var Location = React.createClass({
 		if(this.state.point.x !== -1.0 && this.state.point.y !== -1.0){
 			return(
 				<div className="Location">
-					<Stations url="stations.php" point={this.state.point} />
-					<Nearpoint url="points.php" point={this.state.point} />
+					<Stations url="stations.php" point={this.state.point} lineid={this.state.lineid} chengelineid={this.chengelineid} />
+					<Nearpoint url="points.php" point={this.state.point} lineid={this.state.lineid} chengelineid={this.chengelineid} />
 					<Linemap url="json.php" point={this.state.point} lineid={this.state.lineid} />
 				</div>
 			);
