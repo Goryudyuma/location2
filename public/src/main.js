@@ -153,8 +153,8 @@ var Nearpoint = React.createClass({
 });
 
 var mapstyle = {
-	width: "10%",
-	height: "10%"
+	width: "100%",
+	height: "100%"
 };
 
 var Viewmap = React.createClass({
@@ -163,19 +163,31 @@ var Viewmap = React.createClass({
 		}
 	},
 	drawmap: function(){
-		console.log(this.refs.name);
+		console.log(this.props.line);
+		var latlng = new google.maps.LatLng(this.props.point.x,this.props.point.y);
+		console.log(latlng);
 		var mapOptions = {
+			zoom:9,
+			center:latlng,
+			mapTypeId:google.maps.MapTypeId.ROADMAP
 		};
-		var map = new google.maps.Map(ReactDOM.findDOMNode(this.refs.name), mapOptions);
-		map.data.loadGeoJson(this.props.line);	
+		var map = new google.maps.Map(ReactDOM.findDOMNode(this.refs.googlemap), mapOptions);
+		map.data.addGeoJson(this.props.line);	
+		map.data.setStyle({
+		    strokeWeight: 5,
+			strokeColor: 'blue',
+		  });
+	},
+	componentDidMount: function(){
+		google.maps.event.addDomListener(window, "load", this.drawmap);
 	},
 	componentDidUpdate: function(){
 		this.drawmap();
-		//	google.maps.event.addDomListener(window, "load", this.drawmap);
 	},
 	render: function(){
 		return(
 			<div className="Viewmap" style={mapstyle}>
+				<div ref="googlemap" style={mapstyle}></div>
 			</div>
 		);
 	}
@@ -203,7 +215,7 @@ var Linemap = React.createClass({
 				error: function(xhr, status, err){
 					console.error(this.props.url, status, err.toString());	
 				}.bind(this),
-			});
+				});
 		}	
 	},
 	render: function(){
@@ -216,7 +228,7 @@ var Linemap = React.createClass({
 		} else if (this.state.line[this.props.lineid] != null) {
 			return (
 				<div className="Linemap">
-					<Viewmap line={this.state.line[this.props.lineid]} point={this.props.point}/>
+					<Viewmap line={this.state.line[this.props.lineid]} point={this.props.point} style={mapstyle}/>
 				</div>
 			);
 		} else {
@@ -265,10 +277,10 @@ var Location = React.createClass({
 	render: function(){
 		if(this.state.point.x !== -1.0 && this.state.point.y !== -1.0){
 			return(
-				<div className="Location">
+				<div className="Location" style={mapstyle}>
 					<Stations url="stations.php" point={this.state.point} lineid={this.state.lineid} chengelineid={this.chengelineid} />
 					<Nearpoint url="points.php" point={this.state.point} lineid={this.state.lineid} chengelineid={this.chengelineid} />
-					<Linemap url="json.php" point={this.state.point} lineid={this.state.lineid} />
+					<Linemap url="json.php" point={this.state.point} lineid={this.state.lineid} style={mapstyle}/>
 				</div>
 			);
 		} else {

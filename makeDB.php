@@ -158,8 +158,9 @@ try {
 		$var["sectionid"] = (int) substr($k, 3);
 		$u = array_merge(array_filter($u, function($data){return sizeof($data) == 2;}));	
 		foreach($u as $x => $y){
-			$u[$x][0] = (double)$u[$x][0];
-			$u[$x][1] = (double)$u[$x][1];
+			$memo = (double)$u[$x][0];
+			$u[$x][0] = (double)$u[$x][1];
+			$u[$x][1] = $memo;
 		}
 		$var["json"] = (string) json_encode($u, JSON_UNESCAPED_UNICODE);
 
