@@ -39,53 +39,6 @@ var divleft = {
 	float: 'left'
 };
 
-var Stations = React.createClass({
-	getInitialState: function(){
-		return {
-			data: [],
-			point: {x: -1.0 , y: -1.0}
-		};
-	},
-	loadNearStationsFromServer: function(){
-		if(this.state.point !== this.props.point){
-			$.ajax({
-				url: this.props.url,
-				type: 'POST',
-				dataType: 'json',
-				data: {x: this.props.point.x , y: this.props.point.y},
-				cache: false,
-				success: function(data){
-					this.replaceState({data: data , point: this.props.point});
-				}.bind(this),
-				error: function(xhr, status, err){
-					console.error(this.props.url, status, err.toString());	
-				}.bind(this),
-			});
-		}
-	},
-	componentDidMount: function(){
-		this.loadNearStationsFromServer();
-	},
-	render: function(){
-		if(this.state.data.toString() !== [].toString() ){
-			this.loadNearStationsFromServer();
-			return(
-				<div className="Stations" style={divleft}>
-					<h1>最寄り駅リスト</h1>
-					<Viewtable data={this.state.data} chengelineid={this.props.chengelineid} stationflag={1} />
-				</div>
-			);
-		}else{
-			return(
-				<div className="Stations" style={divleft}>
-					駅情報取得中
-				</div>
-			);
-		}
-	}
-});
-
-
 var Nearpoint = React.createClass({
 	getInitialState: function(){
 		return {
@@ -118,14 +71,14 @@ var Nearpoint = React.createClass({
 			this.loadNearPointFromServer();
 			return(
 				<div className="Nearpoint" style={divleft}>
-					<h1>最寄り地点リスト</h1>
-					<Viewtable data={this.state.data} chengelineid={this.props.chengelineid} stationflag={0}/>
+					<h1>最寄り{this.props.word}リスト</h1>
+					<Viewtable data={this.state.data} chengelineid={this.props.chengelineid} stationflag={this.props.stationflag}/>
 				</div>
 			);
 		} else {
 			return(
 				<div className="Nearpoint" style={divleft}>
-					近くの線路を取得中
+					{this.props.word}情報取得中
 				</div>
 			);
 		}	
@@ -258,8 +211,8 @@ var Location = React.createClass({
 		if(this.state.point.x !== -1.0 && this.state.point.y !== -1.0){
 			return(
 				<div className="Location" style={mapstyle}>
-					<Stations url="stations.php" point={this.state.point} lineid={this.state.lineid} chengelineid={this.chengelineid} />
-					<Nearpoint url="points.php" point={this.state.point} lineid={this.state.lineid} chengelineid={this.chengelineid} />
+					<Nearpoint url="stations.php" point={this.state.point} lineid={this.state.lineid} chengelineid={this.chengelineid} stationflag={1} word="駅" />
+					<Nearpoint url="points.php" point={this.state.point} lineid={this.state.lineid} chengelineid={this.chengelineid} stationflag={0} word="地点" />
 					<Linemap url="json.php" point={this.state.point} lineid={this.state.lineid} style={mapstyle}/>
 				</div>
 			);
