@@ -1,29 +1,36 @@
-var NearStations = React.createClass({
+var Viewtable = React.createClass({
 	render: function(){
-		var nearstation = this.props.data.map(function(station){
+		var oneofthetbody = this.props.data.map(function(one){
 			return(
 				<tbody>
-					<tr onClick={this.props.chengelineid.bind(null, station.sectionid)}>
-					<td>{station.stn}</td>
-					<td>{station.linename}</td>
-					<td>{station.opc}</td>
-					<td>{station.distance}</td>
-				</tr>
+					<tr onClick={this.props.chengelineid.bind(null, one.sectionid)}>
+						<td>{this.props.stationflag === 1 ? one.stn : one.sectionid}</td>	
+						<td>{one.linename}</td>
+						<td>{one.opc}</td>
+						<td>{one.distance}</td>
+					</tr>
 				</tbody>
-			);
+			);	
 		}.bind(this));
-		
-		var thead = React.DOM.thead({},
-			React.DOM.tr({},
-				React.DOM.th({},'駅名'),
-				React.DOM.th({},'線名'),
-				React.DOM.th({},'社名'),
-				React.DOM.th({},'距離')
-			)
-		);
-		
-		return (
-			React.DOM.table({},[thead,nearstation])
+
+		var thead = [''].map(function(){
+			return(
+				<thead>
+					<tr>
+						<th>{this.props.stationflag === 1 ? '駅名' : 'ID'}</th>
+						<th>{'線名'}</th>
+						<th>{'社名'}</th>
+						<th>{'距離'}</th>
+					</tr>
+				</thead>
+			);	
+		}.bind(this));
+
+		return(
+			<table className="Viewtable">
+				{thead}
+				{oneofthetbody}
+			</table>
 		);
 	}
 });
@@ -65,7 +72,7 @@ var Stations = React.createClass({
 			return(
 				<div className="Stations" style={divleft}>
 					<h1>最寄り駅リスト</h1>
-					<NearStations data={this.state.data} chengelineid={this.props.chengelineid}/>
+					<Viewtable data={this.state.data} chengelineid={this.props.chengelineid} stationflag={1} />
 				</div>
 			);
 		}else{
@@ -78,33 +85,6 @@ var Stations = React.createClass({
 	}
 });
 
-var Nearpoints = React.createClass({
-	render: function(){
-		var nearstation = this.props.data.map(function(station){
-			return(
-				React.DOM.tr({},
-					React.DOM.td({},station.sectionid),
-					React.DOM.td({},station.linename),
-					React.DOM.td({},station.opc),
-					React.DOM.td({},station.dist)
-				)
-			);
-		});
-		
-		var thead = React.DOM.thead({},
-			React.DOM.tr({},
-				React.DOM.th({},'ID'),
-				React.DOM.th({},'線名'),
-				React.DOM.th({},'社名'),
-				React.DOM.th({},'距離')
-			)
-		);
-		
-		return (
-			React.DOM.table({},[thead,nearstation])
-		);
-	}
-});
 
 var Nearpoint = React.createClass({
 	getInitialState: function(){
@@ -139,7 +119,7 @@ var Nearpoint = React.createClass({
 			return(
 				<div className="Nearpoint" style={divleft}>
 					<h1>最寄り地点リスト</h1>
-					<Nearpoints data={this.state.data}/>
+					<Viewtable data={this.state.data} chengelineid={this.props.chengelineid} stationflag={0}/>
 				</div>
 			);
 		} else {
@@ -158,13 +138,13 @@ var mapstyle = {
 };
 
 var Viewmap = React.createClass({
-	getInitialState:function(){
+	getInitialState: function(){
 		return { 
 		}
 	},
 	drawmap: function(){
 		console.log(this.props.line);
-		var latlng = new google.maps.LatLng(this.props.point.x,this.props.point.y);
+		var latlng = new google.maps.LatLng(this.props.point.x, this.props.point.y);
 		console.log(latlng);
 		var mapOptions = {
 			zoom:9,
