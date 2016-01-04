@@ -93,6 +93,8 @@ var mapstyle = {
 var Viewmap = React.createClass({
 	getInitialState: function(){
 		return { 
+			nowline: -1,
+			chooseflag: 0
 		}
 	},
 	drawmap: function(){
@@ -110,9 +112,14 @@ var Viewmap = React.createClass({
 		    strokeWeight: 5,
 			strokeColor: 'blue',
 		  });
+		var marker = new google.maps.Marker({
+			position: latlng,
+			map: map
+		});
 	},
 	componentDidMount: function(){
 		google.maps.event.addDomListener(window, "load", this.drawmap);
+		this.drawmap();
 	},
 	componentDidUpdate: function(){
 		this.drawmap();
