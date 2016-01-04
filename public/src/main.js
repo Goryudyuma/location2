@@ -135,7 +135,7 @@ var Linemap = React.createClass({
 	getlinedata: function(lineid){
 		if (lineid !== -1 && this.state.line[lineid] == null) {
 			$.ajax({
-				url: "json.php",
+				url: this.props.url,
 				type: 'POST',
 				dataType: 'json',
 				data: {id: lineid},
@@ -155,7 +155,7 @@ var Linemap = React.createClass({
 		if (this.props.lineid === -1 || this.props.lineid == null) {
 			return (
 				<div className="Linemap">
-					しばらくお待ちください
+					路線を選んでください
 				</div>
 			);
 		} else if (this.state.line[this.props.lineid] != null) {
