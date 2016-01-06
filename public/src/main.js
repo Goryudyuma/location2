@@ -93,8 +93,6 @@ var mapstyle = {
 var Viewmap = React.createClass({
 	getInitialState: function(){
 		return { 
-			nowline: -1,
-			chooseflag: 0
 		}
 	},
 	drawmap: function(){
@@ -123,6 +121,9 @@ var Viewmap = React.createClass({
 	},
 	componentDidUpdate: function(){
 		this.drawmap();
+	},
+	shouldComponentUpdate: function(nextProps){
+		return this.props.line !== nextProps.line;
 	},
 	render: function(){
 		return(
