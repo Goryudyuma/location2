@@ -13,7 +13,7 @@ if (is_numeric($_REQUEST['x'])&&26.0<$_REQUEST['x']&&$_REQUEST['x']<46.0&&is_num
 		$var["length"] = (string)(float) $len;
 		$sth->execute();
 		$result=$sth->fetchAll(PDO::FETCH_CLASS);
-		if (sizeof($result)>=1) {
+		if (sizeof($result)>=20) {
 			foreach ($result as &$v) {
 				$v=json_encode($v,JSON_UNESCAPED_UNICODE);
 			}
