@@ -140,17 +140,20 @@ var Linemap = React.createClass({
 			line:{}	
 		};
 	},
-	getlinedata: function(lineid){
-		if (lineid !== -1 && this.state.line[lineid] == null) {
+	getlinedata: function(){
+		if (this.props.lineid !== -1 && (this.state.line[this.props.year] == null || this.state.line[this.props.year][this.props.lineid] == null)) {
 			$.ajax({
 				url: this.props.url,
 				type: 'POST',
 				dataType: 'json',
-				data: {id: lineid},
+				data: {id: this.props.lineid, year: this.props.year},
 				cache: true,
 				success: function(data){
 					var nowstate = this.state.line;
-					nowstate[this.props.lineid] = data;
+					if(nowstate[this.props.year] == null){
+						nowstate[this.props.year] = {};
+					}
+					nowstate[this.props.year][this.props.lineid] = data;
 					this.setState({line: nowstate});
 				}.bind(this),
 				error: function(xhr, status, err){
@@ -166,10 +169,10 @@ var Linemap = React.createClass({
 					路線を選んでください
 				</div>
 			);
-		} else if (this.state.line[this.props.lineid] != null) {
+		} else if (this.state.line[this.props.year] != null && this.state.line[this.props.year][this.props.lineid] != null) {
 			return (
 				<div className="Linemap">
-					<Viewmap line={this.state.line[this.props.lineid]} point={this.props.point} style={mapstyle}/>
+					<Viewmap line={this.state.line[this.props.year][this.props.lineid]} point={this.props.point} style={mapstyle}/>
 				</div>
 			);
 		} else {
@@ -188,6 +191,7 @@ var Location = React.createClass({
 		return {
 			point: {x: -1.0 , y: -1.0},
 			lineid: -1,
+			year: 2016
 		};
 	},
 	nowLocation: function(){
@@ -221,7 +225,7 @@ var Location = React.createClass({
 				<div className="Location" style={mapstyle}>
 					<Nearpoint url="stations.php" point={this.state.point} lineid={this.state.lineid} chengelineid={this.chengelineid} stationflag={1} word="駅" />
 					<Nearpoint url="points.php" point={this.state.point} lineid={this.state.lineid} chengelineid={this.chengelineid} stationflag={0} word="地点" />
-					<Linemap url="json.php" point={this.state.point} lineid={this.state.lineid} style={mapstyle}/>
+					<Linemap url="json.php" point={this.state.point} lineid={this.state.lineid} year={this.state.year} style={mapstyle}/>
 				</div>
 			);
 		} else {
