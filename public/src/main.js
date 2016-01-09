@@ -52,10 +52,10 @@ var Nearpoint = React.createClass({
 				url: this.props.url,
 				type: 'POST',
 				dataType: 'json',
-				data: {x: this.props.point.x , y: this.props.point.y},
+				data: {x: this.props.point.x, y: this.props.point.y, year: this.props.year},
 				cache: false,
 				success: function(data){
-					this.replaceState({data: data , point: this.props.point});
+					this.setState({data: data , point: this.props.point});
 				}.bind(this),
 				error: function(xhr, status, err){
 					console.error(this.props.url, status, err.toString());	
@@ -96,9 +96,7 @@ var Viewmap = React.createClass({
 		}
 	},
 	drawmap: function(){
-		console.log(this.props.line);
 		var latlng = new google.maps.LatLng(this.props.point.x, this.props.point.y);
-		console.log(latlng);
 		var mapOptions = {
 			zoom:9,
 			center:latlng,
@@ -188,10 +186,11 @@ var Linemap = React.createClass({
 
 var Location = React.createClass({
 	getInitialState: function(){
+		var now = new Date();
 		return {
 			point: {x: -1.0 , y: -1.0},
 			lineid: -1,
-			year: 2016
+			year: now.getFullYear()
 		};
 	},
 	nowLocation: function(){
@@ -223,8 +222,8 @@ var Location = React.createClass({
 		if(this.state.point.x !== -1.0 && this.state.point.y !== -1.0){
 			return(
 				<div className="Location" style={mapstyle}>
-					<Nearpoint url="stations.php" point={this.state.point} lineid={this.state.lineid} chengelineid={this.chengelineid} stationflag={1} word="駅" />
-					<Nearpoint url="points.php" point={this.state.point} lineid={this.state.lineid} chengelineid={this.chengelineid} stationflag={0} word="地点" />
+					<Nearpoint url="stations.php" point={this.state.point} lineid={this.state.lineid} year={this.state.year} chengelineid={this.chengelineid} stationflag={1} word="駅" />
+					<Nearpoint url="points.php" point={this.state.point} lineid={this.state.lineid} year={this.state.year} chengelineid={this.chengelineid} stationflag={0} word="地点" />
 					<Linemap url="json.php" point={this.state.point} lineid={this.state.lineid} year={this.state.year} style={mapstyle}/>
 				</div>
 			);
