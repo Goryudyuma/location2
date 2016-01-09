@@ -11,7 +11,7 @@ if (is_numeric($_REQUEST['x']) && 26.0 < $_REQUEST['x'] && $_REQUEST['x'] < 46.0
 	$var['east'] = (string)(float) $_REQUEST['y'];
 	$var['year'] = (int) $_REQUEST['year'];
 
-	for ($len=0.01; ; $len*=10) {
+	for ($len=0.01; $len < 1000 ; $len*=10) {
 		$var['length'] = (string)(float) $len;
 		$sth->execute();
 		$result=$sth->fetchAll(PDO::FETCH_CLASS);

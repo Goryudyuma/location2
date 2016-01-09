@@ -43,11 +43,12 @@ var Nearpoint = React.createClass({
 	getInitialState: function(){
 		return {
 			data: [],
-			point: {x: -1.0 , y: -1.0}
+			point: {x: -1.0 , y: -1.0},
+			year: 9999
 		};
 	},
 	loadNearPointFromServer: function(){
-		if(this.state.point !== this.props.point){
+		if(this.state.point !== this.props.point || this.props.year !== this.state.year){
 			$.ajax({
 				url: this.props.url,
 				type: 'POST',
@@ -55,7 +56,7 @@ var Nearpoint = React.createClass({
 				data: {x: this.props.point.x, y: this.props.point.y, year: this.props.year},
 				cache: false,
 				success: function(data){
-					this.setState({data: data , point: this.props.point});
+					this.setState({data: data, point: this.props.point, year: this.props.year});
 				}.bind(this),
 				error: function(xhr, status, err){
 					console.error(this.props.url, status, err.toString());	
@@ -83,6 +84,20 @@ var Nearpoint = React.createClass({
 			);
 		}	
 	}	
+});
+
+var Selectyear = React.createClass({
+	change: function(){
+		this.props.changeyear(ReactDOM.findDOMNode(this.refs.year).value);
+	},
+	render: function(){
+		return(
+			<div>
+				<p>{this.props.year}年</p>
+				<input type="number" ref="year" min={1950} max={2100} defaultValue={this.props.year} onChange={this.change} />
+			</div>
+		);
+	}
 });
 
 var mapstyle = {
@@ -121,7 +136,7 @@ var Viewmap = React.createClass({
 		this.drawmap();
 	},
 	shouldComponentUpdate: function(nextProps){
-		return this.props.line !== nextProps.line;
+		return this.props.line !== nextProps.line || this.props.year !== nextProps.year;
 	},
 	render: function(){
 		return(
@@ -170,7 +185,7 @@ var Linemap = React.createClass({
 		} else if (this.state.line[this.props.year] != null && this.state.line[this.props.year][this.props.lineid] != null) {
 			return (
 				<div className="Linemap">
-					<Viewmap line={this.state.line[this.props.year][this.props.lineid]} point={this.props.point} style={mapstyle}/>
+					<Viewmap line={this.state.line[this.props.year][this.props.lineid]} point={this.props.point} year={this.props.year} style={mapstyle}/>
 				</div>
 			);
 		} else {
@@ -212,6 +227,9 @@ var Location = React.createClass({
 			}, error, options
 		);
 	},
+	changeyear: function(year){
+		this.setState({year: year});
+	},
 	chengelineid: function(lineid){
 		this.setState({lineid: lineid});
 	},
@@ -224,6 +242,7 @@ var Location = React.createClass({
 				<div className="Location" style={mapstyle}>
 					<Nearpoint url="stations.php" point={this.state.point} lineid={this.state.lineid} year={this.state.year} chengelineid={this.chengelineid} stationflag={1} word="駅" />
 					<Nearpoint url="points.php" point={this.state.point} lineid={this.state.lineid} year={this.state.year} chengelineid={this.chengelineid} stationflag={0} word="地点" />
+					<Selectyear year={this.state.year} changeyear={this.changeyear} />
 					<Linemap url="json.php" point={this.state.point} lineid={this.state.lineid} year={this.state.year} style={mapstyle}/>
 				</div>
 			);

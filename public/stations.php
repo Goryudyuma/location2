@@ -11,9 +11,11 @@ if (is_numeric($_REQUEST['x']) && is_numeric($_REQUEST['y']) && is_numeric($_REQ
 	$var['year'] = (int) $_REQUEST['year'];
 	$sth->execute();
 	$result=$sth->fetchAll(PDO::FETCH_CLASS);
-	foreach ($result as &$v) {
-		$v=json_encode($v,JSON_UNESCAPED_UNICODE);
+	if (sizeof($result) !== 0) {
+		foreach ($result as &$v) {
+			$v=json_encode($v,JSON_UNESCAPED_UNICODE);
+		}
+		echo '[' . implode(',', $result) . ']';
 	}
-	echo '[' . implode(',', $result) . ']';
 	$pdo = NULL;
 }
