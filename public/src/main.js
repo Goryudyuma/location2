@@ -1,13 +1,30 @@
+var Table = ReactBootstrap.Table;
+var Input = ReactBootstrap.Input;
+var Col = ReactBootstrap.Col;
+
+var Top = React.createClass({
+	render: function(){
+		return(
+			<div>
+				<p>データは国土交通省国土政策局国土情報課
+				<a href="http://nlftp.mlit.go.jp/ksj/index.html" target="_blank">国土数値情報ダウンロードサービス</a>の
+				<a href="http://nlftp.mlit.go.jp/ksj/gml/datalist/KsjTmplt-N05.html" target="_blank">国土数値情報鉄道時系列データ</a>から取得しています。
+				詳細は<a href="https://github.com/Goryudyuma/location2" target="_blank">https://github.com/Goryudyuma/location2</a>まで。</p>
+			</div>
+		);
+	}
+});
+
 var Viewtable = React.createClass({
 	render: function(){
 		var oneofthetbody = this.props.data.map(function(one){
 			return(
 				<tbody>
-					<tr onClick={this.props.chengelineid.bind(null, one.sectionid)}>
+					<tr onClick={this.props.chengelineid.bind(null, one.sectionid)} onTouchStart={this.props.chengelineid.bind(null, one.sectionid)}>
 						<td>{this.props.stationflag === 1 ? one.stn : one.sectionid}</td>	
 						<td>{one.linename}</td>
 						<td>{one.opc}</td>
-						<td>{one.distance}</td>
+						<td>{Number(one.distance).toFixed(5)}</td>
 					</tr>
 				</tbody>
 			);	
@@ -27,17 +44,13 @@ var Viewtable = React.createClass({
 		}.bind(this));
 
 		return(
-			<table className="Viewtable">
+			<Table striped bordered condensed hover className="Viewtable">
 				{thead}
 				{oneofthetbody}
-			</table>
+			</Table>
 		);
 	}
 });
-
-var divleft = {
-	float: 'left'
-};
 
 var Nearpoint = React.createClass({
 	getInitialState: function(){
@@ -71,14 +84,14 @@ var Nearpoint = React.createClass({
 		if(this.state.data.toString() !== [].toString() ){
 			this.loadNearPointFromServer();
 			return(
-				<div className="Nearpoint" style={divleft}>
+				<div className="Nearpoint" >
 					<h1>最寄り{this.props.word}リスト</h1>
 					<Viewtable data={this.state.data} chengelineid={this.props.chengelineid} stationflag={this.props.stationflag}/>
 				</div>
 			);
 		} else {
 			return(
-				<div className="Nearpoint" style={divleft}>
+				<div className="Nearpoint" >
 					{this.props.word}情報取得中
 				</div>
 			);
@@ -88,13 +101,12 @@ var Nearpoint = React.createClass({
 
 var Selectyear = React.createClass({
 	change: function(){
-		this.props.changeyear(ReactDOM.findDOMNode(this.refs.year).value);
+		this.props.changeyear(this.refs.year.getValue());
 	},
 	render: function(){
 		return(
 			<div>
-				<p>{this.props.year}年</p>
-				<input type="number" ref="year" min={1950} max={2100} defaultValue={this.props.year} onChange={this.change} />
+					<Input type="number" ref="year" min={1950} max={2100} defaultValue={this.props.year} onChange={this.change} />
 			</div>
 		);
 	}
@@ -129,7 +141,6 @@ var Viewmap = React.createClass({
 		});
 	},
 	componentDidMount: function(){
-		google.maps.event.addDomListener(window, "load", this.drawmap);
 		this.drawmap();
 	},
 	componentDidUpdate: function(){
@@ -240,9 +251,16 @@ var Location = React.createClass({
 		if(this.state.point.x !== -1.0 && this.state.point.y !== -1.0){
 			return(
 				<div className="Location" style={mapstyle}>
-					<Nearpoint url="stations.php" point={this.state.point} lineid={this.state.lineid} year={this.state.year} chengelineid={this.chengelineid} stationflag={1} word="駅" />
-					<Nearpoint url="points.php" point={this.state.point} lineid={this.state.lineid} year={this.state.year} chengelineid={this.chengelineid} stationflag={0} word="地点" />
-					<Selectyear year={this.state.year} changeyear={this.changeyear} />
+					<Top />
+					<Col sm={12} md={5}>
+						<Nearpoint url="stations.php" point={this.state.point} lineid={this.state.lineid} year={this.state.year} chengelineid={this.chengelineid} stationflag={1} word="駅" />
+					</Col>
+					<Col sm={12} md={5}>
+						<Nearpoint url="points.php" point={this.state.point} lineid={this.state.lineid} year={this.state.year} chengelineid={this.chengelineid} stationflag={0} word="地点" />
+					</Col>
+					<Col sm={12} md={2}>
+						<Selectyear year={this.state.year} changeyear={this.changeyear} />
+					</Col>
 					<Linemap url="json.php" point={this.state.point} lineid={this.state.lineid} year={this.state.year} style={mapstyle}/>
 				</div>
 			);
