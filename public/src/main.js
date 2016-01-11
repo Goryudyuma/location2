@@ -231,11 +231,11 @@ var Location = React.createClass({
 		};
 
 		navigator.geolocation.watchPosition(
-			(pos) => {
+			function(pos){
 				if (this.state.point.x !== pos.coords.latitude || this.state.point.y !== pos.coords.longitude){
 					this.setState({point: {x: pos.coords.latitude , y: pos.coords.longitude}});
 				}
-			}, error, options
+			}.bind(this), error, options
 		);
 	},
 	changeyear: function(year){
