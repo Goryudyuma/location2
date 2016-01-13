@@ -7,9 +7,9 @@ var Top = React.createClass({
 		return(
 			<div>
 				<p>データは国土交通省国土政策局国土情報課
-				<a href="http://nlftp.mlit.go.jp/ksj/index.html" target="_blank">国土数値情報ダウンロードサービス</a>の
-				<a href="http://nlftp.mlit.go.jp/ksj/gml/datalist/KsjTmplt-N05.html" target="_blank">国土数値情報鉄道時系列データ</a>から取得しています。
-				詳細は<a href="https://github.com/Goryudyuma/location2" target="_blank">https://github.com/Goryudyuma/location2</a>まで。</p>
+					<a href="http://nlftp.mlit.go.jp/ksj/index.html" target="_blank">国土数値情報ダウンロードサービス</a>の
+					<a href="http://nlftp.mlit.go.jp/ksj/gml/datalist/KsjTmplt-N05.html" target="_blank">国土数値情報鉄道時系列データ</a>から取得しています。
+					詳細は<a href="https://github.com/Goryudyuma/location2" target="_blank">https://github.com/Goryudyuma/location2</a>まで。</p>
 			</div>
 		);
 	}
@@ -55,38 +55,36 @@ var Viewtable = React.createClass({
 var Nearpoint = React.createClass({
 	getInitialState: function(){
 		return {
-			data: [],
-			point: {x: -1.0 , y: -1.0},
-			year: 9999
+			data: []
 		};
 	},
-	loadNearPointFromServer: function(){
-		if(this.state.point !== this.props.point || this.props.year !== this.state.year){
-			$.ajax({
-				url: this.props.url,
-				type: 'POST',
-				dataType: 'json',
-				data: {x: this.props.point.x, y: this.props.point.y, year: this.props.year},
-				cache: false,
-				success: function(data){
-					this.setState({data: data, point: this.props.point, year: this.props.year});
-				}.bind(this),
-				error: function(xhr, status, err){
-					console.error(this.props.url, status, err.toString());	
-				}.bind(this),
-			});
-		}	
+	loadNearPointFromServer: function(nextProps){
+		$.ajax({
+			url: this.props.url,
+			type: 'POST',
+			dataType: 'json',
+			data: {x: nextProps.point.x, y: nextProps.point.y, year: nextProps.year},
+			cache: false,
+			success: function(data){
+				this.setState({data: data});
+			}.bind(this),
+			error: function(xhr, status, err){
+				console.error(nextProps.url, status, err.toString());	
+			}.bind(this),
+		});
 	},
 	componentDidMount: function(){
-		this.loadNearPointFromServer();
+		this.loadNearPointFromServer(this.props);
+	},
+	componentWillReceiveProps: function(nextProps){
+		this.loadNearPointFromServer(nextProps);
 	},
 	render: function(){
 		if(this.state.data.toString() !== [].toString() ){
-			this.loadNearPointFromServer();
 			return(
 				<div className="Nearpoint" >
 					<h1>最寄り{this.props.word}リスト</h1>
-					<Viewtable data={this.state.data} chengelineid={this.props.chengelineid} stationflag={this.props.stationflag}/>
+					<Viewtable data={this.state.data} chengelineid={this.props.chengelineid} stationflag={this.props.stationflag} point={this.props.point}/>
 				</div>
 			);
 		} else {
@@ -106,7 +104,7 @@ var Selectyear = React.createClass({
 	render: function(){
 		return(
 			<div>
-					<Input type="number" ref="year" min={1950} max={2100} defaultValue={this.props.year} onChange={this.change} />
+				<Input type="number" ref="year" min={1950} max={2100} defaultValue={this.props.year} onChange={this.change} />
 			</div>
 		);
 	}
@@ -118,10 +116,6 @@ var mapstyle = {
 };
 
 var Viewmap = React.createClass({
-	getInitialState: function(){
-		return { 
-		}
-	},
 	drawmap: function(){
 		var latlng = new google.maps.LatLng(this.props.point.x, this.props.point.y);
 		var mapOptions = {
@@ -132,9 +126,9 @@ var Viewmap = React.createClass({
 		var map = new google.maps.Map(ReactDOM.findDOMNode(this.refs.googlemap), mapOptions);
 		map.data.addGeoJson(this.props.line);	
 		map.data.setStyle({
-		    strokeWeight: 5,
+			strokeWeight: 5,
 			strokeColor: 'blue',
-		  });
+		});
 		var marker = new google.maps.Marker({
 			position: latlng,
 			map: map
@@ -183,7 +177,7 @@ var Linemap = React.createClass({
 				error: function(xhr, status, err){
 					console.error(this.props.url, status, err.toString());	
 				}.bind(this),
-				});
+			});
 		}	
 	},
 	render: function(){
