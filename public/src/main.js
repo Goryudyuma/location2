@@ -16,6 +16,8 @@ var Top = React.createClass({
 });
 
 var Viewtable = React.createClass({
+	/* ヒュベニの公式より世界測地系1984(WGS84)での二点間距離を算出します */
+	/* http://yamadarake.jp/trdi/report000001.htmlを基に作成 */
 	render: function(){
 		var oneofthetbody = this.props.data.map(function(one){
 			return(
@@ -37,7 +39,7 @@ var Viewtable = React.createClass({
 						<th>{this.props.stationflag === 1 ? '駅名' : 'ID'}</th>
 						<th>{'線名'}</th>
 						<th>{'社名'}</th>
-						<th>{'距離'}</th>
+						<th>{'距離(m)'}</th>
 					</tr>
 				</thead>
 			);	
