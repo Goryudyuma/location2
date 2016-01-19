@@ -11,7 +11,7 @@ if (is_numeric($_REQUEST['x']) && 26.0 < $_REQUEST['x'] && $_REQUEST['x'] < 46.0
 		section.lin AS linename, 
 		section.rfid as sectionid, 
 		section.opc AS opc, 
-		SQRT(POW(ABS(:north/180*PI() - ST_X(c.pos)/180*PI())*(6378137.0*(0.9933056200098024/POW(SQRT(1 - POW( 0.08181919084296535*SIN( (:north/180*PI() + ST_X(c.pos)/180*PI())/2), 2)), 3))), 2) + POW(ABS(:east/180*PI() - ST_Y(c.pos)/180*PI())*( 6378137.0/SQRT(1 - POW( 0.08181919084296535*SIN( (:north/180*PI() + ST_X(c.pos)/180*PI())/2), 2)))*COS( (:north/180*PI() + ST_X(c.pos)/180*PI())/2), 2)) AS distance,
+		TRUNCATE(SQRT(POW(ABS(:north/180*PI() - ST_X(c.pos)/180*PI())*(6378137.0*(0.9933056200098024/POW(SQRT(1 - POW( 0.08181919084296535*SIN( (:north/180*PI() + ST_X(c.pos)/180*PI())/2), 2)), 3))), 2) + POW(ABS(:east/180*PI() - ST_Y(c.pos)/180*PI())*( 6378137.0/SQRT(1 - POW( 0.08181919084296535*SIN( (:north/180*PI() + ST_X(c.pos)/180*PI())/2), 2)))*COS( (:north/180*PI() + ST_X(c.pos)/180*PI())/2), 2)), 0) AS distance,
 		ST_X(c.pos) AS north, 
 		ST_Y(c.pos) AS east 
 	FROM 
