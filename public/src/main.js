@@ -125,10 +125,13 @@ var Viewmap = React.createClass({
 		};
 		var map = new google.maps.Map(ReactDOM.findDOMNode(this.refs.googlemap), mapOptions);
 		map.data.addGeoJson(this.props.line);	
-		map.data.setStyle({
-			strokeWeight: 5,
-			strokeColor: 'blue',
-		});
+		map.data.setStyle(function(feature) {
+			return {
+				strokeWeight: 5,
+				strokeColor: 'blue',
+				icon:feature.getProperty('icon')
+			};
+		  });
 		var marker = new google.maps.Marker({
 			position: latlng,
 			map: map
