@@ -1,6 +1,6 @@
 <?php
 
-$pass = explode("\n", file_get_contents(__dir__.'/N05-14_GML/PW.txt'));
+$pass = explode("\n", file_get_contents(__dir__.'/N05-15_GML/PW.txt'));
 
 try {
 	$pdo = new PDO('mysql:dbname=location;host=localhost', $pass[0], $pass[1], [PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION]);
@@ -66,7 +66,7 @@ try {
 	$pdo->exec($query);
 
 
-	$json = file_get_contents('./N05-14_GML/N05-14.json');
+	$json = file_get_contents('./N05-15_GML/N05-15.json');
 	$contents = json_decode($json, true);
 	$sth = $pdo->prepare('INSERT INTO section (`id`, `rint`, `lin`, `opc`, `rfid`, `time`, `begin`, `end`) VALUES (?, ?, ?, ?, ?, ?, ?, ?);');
 	foreach ($contents['ksj_RailroadSection2'] as $v) {
@@ -118,8 +118,8 @@ try {
 
 	$b=[];
 	foreach ($contents['gml_Curve'] as $v) {
-		$b[substr($v['@attributes']['gml_id'], 3)] = explode("\n", ($v['gml_segments']['gml_LineStringSegment']['gml_posList']));
-		foreach ($b[substr($v['@attributes']['gml_id'], 3)] as &$c) {
+		$b[substr($v['@attributes']['gml_id'], 2)] = explode("\n", ($v['gml_segments']['gml_LineStringSegment']['gml_posList']));
+		foreach ($b[substr($v['@attributes']['gml_id'], 2)] as &$c) {
 			$c=explode(' ', trim($c));
 		}
 	}
@@ -131,7 +131,7 @@ try {
 	$sth->bindParam(':east', $var['east'], PDO::PARAM_STR);
 
 	foreach ($b as $k => $u) {
-		$var['sectionid'] = (int) substr($k, 3);
+		$var['sectionid'] = $k;
 		foreach ($u as $v) {
 			if(sizeof($v)==2){
 				$var['north'] = (string)(float) $v[0];
@@ -151,7 +151,7 @@ try {
 	$sth->bindParam(':json', $var['json'], PDO::PARAM_STR);
 
 	foreach ($b as $k => $u) {
-		$var['sectionid'] = (int) substr($k, 3);
+		$var['sectionid'] = $k;
 		$u = array_merge(array_filter($u, function($data){return sizeof($data) == 2;}));	
 		foreach($u as $x => $y){
 			$memo = (double)$u[$x][0];
